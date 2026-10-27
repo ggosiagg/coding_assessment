@@ -46,8 +46,6 @@ adae <- pharmaverseadam::adae
 # ------------------------------------------------------------------------------
 adae <- adae |>
   filter(
-    # safety population (it is not explicitly pointed in specs, but AE is usually
-    # performed on Safety population)
     SAFFL == "Y",
     # treatment-emergent adverse events
     TRTEMFL == "Y"
