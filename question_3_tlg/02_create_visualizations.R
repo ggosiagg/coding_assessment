@@ -1,6 +1,7 @@
 # ==============================================================================
 # Program:      02_create_visualizations.R
-# Purpose:      Create visualizations for Question 3 (TLG):
+# Question:     3 - TLG (Tables, Listings, Graphs)
+# Purpose:      Create AE visualizations from ADAM datasets:
 #                 1. Bar chart of AE severity distribution by treatment arm
 #                 2. Top 10 most frequent AEs with 95% Clopper-Pearson CIs
 # Author:       ggosiagg
@@ -9,9 +10,24 @@
 # Output:       question_3_tlg/ae_severity_bar_chart.png
 #               question_3_tlg/top10_ae_chart.png
 #               question_3_tlg/02_create_visualizations.log
-# Notes:        Analysis is performed on the Safety population (SAFFL == "Y")
+#
+# Script flow (logical steps):
+#   Step 0 - Start run log (base R sink): full audit trail of the execution
+#   Step 1 - Load libraries and source data (ADSL, ADAE)
+#   Step 2 - Pre-process: restrict ADAE to the Safety population (SAFFL == "Y")
+#   Step 3 - Plot 1: AE severity distribution by treatment arm (bar chart)
+#   Step 4 - Plot 2: Top 10 most frequent AEs (one record per subject per term)
+#            with exact 95% Clopper-Pearson confidence intervals
+#   Step 5 - Close the run log and record sessionInfo() for reproducibility
+#
+# Notes:
+#   - AE analyses are conventionally performed on the Safety population;
+#     although the specs do not state it explicitly, SAFFL == "Y" is applied.
+#   - CIs are exact (Clopper-Pearson via binom.test), appropriate for binary
+#     incidence proportions, and are expressed as percentages for display.
+#   - ggsave(scale = 2) is used so axis/treatment-arm labels render legibly
+#     in the PNG files (they overlapped at the default scale).
 # ==============================================================================
-
 # Start run log (base R) --------------------------------------
 log_file <- "question_3_tlg/02_create_visualizations.log"
 log_con  <- file(log_file, open = "wt")
