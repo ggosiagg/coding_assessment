@@ -1,3 +1,29 @@
+# ==============================================================================
+# Program:      02_create_visualizations.R
+# Purpose:      Create visualizations for Question 3 (TLG):
+#                 1. Bar chart of AE severity distribution by treatment arm
+#                 2. Top 10 most frequent AEs with 95% Clopper-Pearson CIs
+# Author:       ggosiagg
+# Date created: 2026-10-27
+# Input:        pharmaverseadam::adsl, pharmaverseadam::adae
+# Output:       question_3_tlg/ae_severity_bar_chart.png
+#               question_3_tlg/top10_ae_chart.png
+#               question_3_tlg/02_create_visualizations.log
+# Notes:        Analysis is performed on the Safety population (SAFFL == "Y")
+# ==============================================================================
+
+# Start run log (base R) --------------------------------------
+log_file <- "question_3_tlg/02_create_visualizations.log"
+log_con  <- file(log_file, open = "wt")
+
+sink(log_con, type = "output", split = TRUE) # echo output to console AND log
+sink(log_con, type = "message")              # capture messages/warnings in log
+
+cat("=============================================================\n")
+cat("Run log: 02_create_visualizations.R\n")
+cat("Started:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")
+cat("=============================================================\n\n")
+
 # Load libraries & data -------------------------------------
 library(dplyr)
 library(gtsummary)
@@ -8,6 +34,8 @@ library(ggplot2)
 adsl <- pharmaverseadam::adsl
 adae <- pharmaverseadam::adae
 
+cat("Raw ADAE records:", nrow(adae), "\n")
+
 # Pre-processing --------------------------------------------
 adae <- adae |>
   filter(
@@ -15,6 +43,9 @@ adae <- adae |>
     # performed on Safety population)
     SAFFL == "Y"
   )
+
+cat("Safety population (SAFFL == 'Y') records:", nrow(adae), "\n")
+cat("Safety population subjects:", n_distinct(adae$USUBJID), "\n\n")
 
 # Plot 1
 # Create a bar plot
@@ -29,6 +60,7 @@ ae_severity <- ggplot(adae, aes(x = TRT01A, fill = AESEV)) +
 # Save it to png file, used scale = 2 to properly render the plot 
 # labels of treatment arm were overlapping with scale = 1
 ggsave("question_3_tlg/ae_severity_bar_chart.png", plot = ae_severity, scale = 2)
+cat("Saved: question_3_tlg/ae_severity_bar_chart.png\n")
 
 # Plot 2
 # Calculate most often AETERM, calculate an AETERM only ONCE per patient 
@@ -88,3 +120,15 @@ top10_ae <- ggplot(top10_ae_terms, aes(x = est, y = AETERM)) +
 # Save it to png file, using scale = 2 to properly
 # render the plot in png file
 ggsave("question_3_tlg/top10_ae_chart.png", plot = top10_ae, scale=2)
+cat("Saved: question_3_tlg/top10_ae_chart.png\n")
+
+# End of run --------------------------------------------------
+cat("\n=============================================================\n")
+cat("Finished:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")
+cat("=============================================================\n\n")
+sessionInfo()
+
+# Close log connections (base R)
+sink(type = "message")
+sink(type = "output")
+close(log_con)
